@@ -1,4 +1,4 @@
-#define PLUGIN_VERSION "1.1"
+#define PLUGIN_VERSION "1.2"
 
 #pragma semicolon 1
 #include <sourcemod>
@@ -25,17 +25,17 @@ static		bool:g_bHook, String:g_sCvarColor[Colors][24], Float:g_fCvarLife, bool:g
 
 public OnPluginStart()
 {
-	CreateConVar("hl2dm_trail_ball_version", PLUGIN_VERSION,	"Trail Ball Variation plugin version", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	CreateConVar("hl2dm_trail_ball_version", PLUGIN_VERSION,	"Trail Ball Variation plugin version", FCVAR_SPONLY|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 
-	new Handle:hCvarRColor	= CreateConVar("hl2dm_trail_random_color",		"1",			"0=Disable, 1=Enable random trail colors.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	new Handle:hCvarColor	= CreateConVar("hl2dm_trail_static_color",		"64 137 59",	"The default trail color. Three values between 0-255 separated by spaces. RGB - Red Green Blue.", FCVAR_PLUGIN);
-	new Handle:hCvarTDM		= CreateConVar("hl2dm_trail_tdm_color",			"0",			"Forced to use Team deathmatch colors.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	new Handle:hCvarRebels	= CreateConVar("hl2dm_trail_rebels_color",		"198 87 0",		"The default Rebels team trail color (Team deathmatch). Three values between 0-255 separated by spaces. RGB - Red Green Blue.", FCVAR_PLUGIN);
-	new Handle:hCvarCombine	= CreateConVar("hl2dm_trail_combine_color",		"91 244 191",	"The default Combine team trail color (Team deathmatch). Three values between 0-255 separated by spaces. RGB - Red Green Blue.", FCVAR_PLUGIN);
-	new Handle:hCvarLife		= CreateConVar("hl2dm_trail_life_time",			"2", 			"How long the trail is shown ('tail' length).", FCVAR_PLUGIN);
-	new Handle:hCvarRWidth	= CreateConVar("hl2dm_trail_radom_width",		"0", 			"0=Disable, 1=Enable random width", FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	new Handle:hCvarSWidth	= CreateConVar("hl2dm_trail_start_width",		"5", 			"The width of the beam to the beginning. Note: if 'hl2dm_trail_radom_width' = 1 the random value of start width will be between 1 and this convar.", FCVAR_PLUGIN);
-	new Handle:hCvarEWidth	= CreateConVar("hl2dm_trail_end_width",			"5", 			"The width of the beam when it has full expanded. Note: if 'hl2dm_trail_radom_width' = 1 the random value of end width will be between 1 and this convar.", FCVAR_PLUGIN);
+	new Handle:hCvarRColor	= CreateConVar("hl2dm_trail_random_color",		"1",			"0=Disable, 1=Enable random trail colors.", _, true, 0.0, true, 1.0);
+	new Handle:hCvarColor	= CreateConVar("hl2dm_trail_static_color",		"64 137 59",	"The default trail color. Three values between 0-255 separated by spaces. RGB - Red Green Blue.");
+	new Handle:hCvarTDM		= CreateConVar("hl2dm_trail_tdm_color",			"0",			"Forced to use Team deathmatch colors.", _, true, 0.0, true, 1.0);
+	new Handle:hCvarRebels	= CreateConVar("hl2dm_trail_rebels_color",		"198 87 0",		"The default Rebels team trail color (Team deathmatch). Three values between 0-255 separated by spaces. RGB - Red Green Blue.");
+	new Handle:hCvarCombine	= CreateConVar("hl2dm_trail_combine_color",		"91 244 191",	"The default Combine team trail color (Team deathmatch). Three values between 0-255 separated by spaces. RGB - Red Green Blue.");
+	new Handle:hCvarLife	= CreateConVar("hl2dm_trail_life_time",			"2", 			"How long the trail is shown ('tail' length).");
+	new Handle:hCvarRWidth	= CreateConVar("hl2dm_trail_radom_width",		"0", 			"0=Disable, 1=Enable random width", _, true, 0.0, true, 1.0);
+	new Handle:hCvarSWidth	= CreateConVar("hl2dm_trail_start_width",		"5", 			"The width of the beam to the beginning. Note: if 'hl2dm_trail_radom_width' = 1 the random value of start width will be between 1 and this convar.");
+	new Handle:hCvarEWidth	= CreateConVar("hl2dm_trail_end_width",			"5", 			"The width of the beam when it has full expanded. Note: if 'hl2dm_trail_radom_width' = 1 the random value of end width will be between 1 and this convar.");
 	AutoExecConfig(true, "trailball_variation");
 
 	GetConVarString(hCvarColor, g_sCvarColor[Static], 24);
@@ -72,10 +72,10 @@ public OnMapEnd()
 public OnEntityCreated(entity, const String:classname[])
 {
 	if (g_bHook && StrEqual(classname, "prop_combine_ball"))
-		CreateTimer(0.0, TV_t_DelayPostSpawn, EntIndexToEntRef(entity));
+		RequestFrame(TV_t_DelayPostSpawn, EntIndexToEntRef(entity));
 }
 
-public Action:TV_t_DelayPostSpawn(Handle:timer, any:entity)
+TV_t_DelayPostSpawn(entity)
 {
 	if ((entity = EntRefToEntIndex(entity)) != INVALID_ENT_REFERENCE && GetEntProp(entity, Prop_Data, "m_bWeaponLaunched"))
 		CreateSpriteTrail(entity);
